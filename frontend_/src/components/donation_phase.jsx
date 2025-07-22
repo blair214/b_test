@@ -145,37 +145,64 @@ useEffect(() =>
 
 
 
-  const handleChoice = (card, action) => {
+  const handleChoice = (card, action) => 
+  {
     if (specialCardToPlay || diceSelectionCard || diceToModify) {
     console.warn("🛑 Cannot assign cards during special card resolution");
     return;
     }
-    if (action === "keep") {
+    if (action === "keep") 
+    {
       if (kept) return alert("You've already kept a card.");
       setKept(card);
-    } else if (action === "discard") {
+
+      broadcastState
+      ({
+        donationAction: 
+        {
+          player: player.name,
+          action: "kept",
+        },
+      })
+    } 
+    else if (action === "discard") 
+    {
       if (discarded) return alert("You've already discarded a card.");
       setDiscarded(card);
-    } else if (action === "pool") {
+
+      broadcastState
+      ({
+        donationAction: 
+        {
+          player: player.name,
+          action: "discarded",
+        },
+      })
+
+      
+    } 
+    else if (action === "pool") 
+      
+    {
       if (shared.length >= numToDraw - 2)
         return alert("Too many shared cards.");
 
-       const newShared = [...shared, card];
-  const pooledCard = { ...card, pooledBy: player.name };
-  const updatedSharedPool = [...sharedPool, pooledCard];
+      const newShared = [...shared, card];
+      const pooledCard = { ...card, pooledBy: player.name };
+      const updatedSharedPool = [...sharedPool, pooledCard];
 
-  setShared(newShared);
-  setSharedPool(updatedSharedPool); // ✅ Update local sharedPool state
+      setShared(newShared);
+      setSharedPool(updatedSharedPool); // ✅ Update local sharedPool state
 
-  broadcastState({
-    sharedPool: updatedSharedPool, // ✅ Broadcast full updated shared pool
-    donationAction: {
-      player: player.name,
-      action: "pooled",
-      card: pooledCard,
-    },
-  });
-}
+      broadcastState({
+        sharedPool: updatedSharedPool, // ✅ Broadcast full updated shared pool
+        donationAction: {
+          player: player.name,
+          action: "pooled",
+          card: pooledCard,
+        },
+      });
+    }
 
     setCardsToProcess((prev) => prev.slice(1));
   };

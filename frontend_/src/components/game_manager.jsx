@@ -108,6 +108,28 @@ useEffect(() => {
 }, [phase]);
 
 useEffect(() => {
+  const handler = (gameState) => {
+    if (gameState?.donationAction?.action === "discarded") {
+      console.log(`ASDFDSF🗑️ ${gameState.donationAction.player} discarded a card`);
+    }
+  };
+
+  socket.on("sync_game_state", handler);
+  return () => socket.off("sync_game_state", handler);
+}, []);
+
+useEffect(() => {
+  const handler = (gameState) => {
+    if (gameState?.donationAction?.action === "kept") {
+      console.log(`sfsfsfs ${gameState.donationAction.player} kept a card`);
+    }
+  };
+
+  socket.on("sync_game_state", handler);
+  return () => socket.off("sync_game_state", handler);
+}, []);
+
+useEffect(() => {
   console.log("🎯 auctionTurnOffset updated to:", auctionTurnOffset);
 }, [auctionTurnOffset]);
 
