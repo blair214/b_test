@@ -331,7 +331,12 @@ useEffect(() =>
 
     {/* 👤 Non-current player's view */}
     {!isCurrentPlayer && (
-      <p>⏳ Waiting for {players[currentPlayerIndex]?.name} to complete their turn...</p>
+      <>
+      <p>⏳ Waiting for {players[currentPlayerIndex]?.name} to complete their turn ...</p>
+      {/* Working here}*/}
+
+      <Card card={currentCard} startflipped={true} />
+      </> 
     )}
 
     {/* ✅ Main player control section */}

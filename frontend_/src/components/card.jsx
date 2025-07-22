@@ -11,8 +11,10 @@ const typeColors = {
 };
 
 const Card = (props) => {
+  const { card: cardProp, startflipped = false } = props;
   const [flipped, setFlipped] = useState(false);
   const card = props.card ?? props;
+
   if (!card) return null;
 
   const { value, type, tieBreaker, isSpecial } = card;
@@ -21,9 +23,16 @@ const Card = (props) => {
     ? "#ffd700"
     : typeColors[type] || "#fff";
 
-  return (
-    <div className="container" onClick={() => setFlipped(!flipped)}>
-      <div className={`card ${flipped ? "flipped" : ""}`}>
+  const isFlipped = startflipped || flipped;
+
+   return (
+    <div
+      className="container"
+      onClick={() => {
+        if (!startflipped) setFlipped(!flipped);
+      }}
+    >
+      <div className={`card ${isFlipped ? "flipped" : ""}`}>
         <div className="front">
           <div style={{ backgroundColor, padding: "10px", borderRadius: "8px" }}>
             <h4>{type}</h4>
