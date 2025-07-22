@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Card from "./card";
+import "./card.css";
 
 const DonationPhase = ({
   player,
