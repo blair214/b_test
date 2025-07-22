@@ -273,7 +273,7 @@ useEffect(() => {
 
       <div>
         <h3>Players Online:</h3>
-        <ul>
+        <ul style={{ display: "flex", gap: "1rem", listStyleType: "none", padding: 0 }}>
           {playersOnline.map((p, i) => (
             <li key={i}>{p.name}</li>
           ))}

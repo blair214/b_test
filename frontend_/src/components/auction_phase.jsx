@@ -89,6 +89,49 @@ const AuctionPhase = ({
 
 
 
+  const hostResetAuction = () => 
+  {
+    if (playerName !== players[0]?.name) {
+      alert("Only the host can reset the auction round.");
+      return;
+    }
+
+    if (discardPile.length === 0) {
+      alert("No cards left in the discard pile to auction.");
+      return;
+    }
+
+    const startingIndex = (lastDonatorIndex + 1) % players.length;
+
+    const newState = {
+      // Core auction values
+      currentCardIndex: 0,
+      currentBid: 0,
+      highestBidder: null,
+
+      // Auction player tracking
+      activePlayerIndex: 0,
+      auctionTurnOffset: startingIndex,
+      activeBidders: players.map(() => true),
+
+      // Gold/card payment resets
+      awaitingGoldPayment: false,
+      awaitingCardPayment: false,
+      goldWinner: null,
+      goldCard: null,
+      goldPaymentWinner: null,
+      selectedPaymentCards: [],
+
+      // Retain discard pile and phase
+      discardPile,
+      phase: "auction",
+    };
+
+    console.warn("🛠️ Host manually reset auction round");
+    broadcastState(newState);
+  };
+
+
   const getNextActivePlayerIndex = () => 
   {
     let next = (activePlayerIndex + 1) % players.length;
@@ -141,6 +184,27 @@ const AuctionPhase = ({
       // nextPlayer();
     }
   };
+
+  const handleResetAuction = () => {
+  console.warn("🧨 Resetting auction phase by host");
+
+  const hostIndex = 0;
+  setAuctionTurnOffset(hostIndex);
+  setActivePlayerIndex(0);
+  setCurrentBid(0);
+  setHighestBidder(null);
+  const allTrue = players.map(() => true);
+  setActiveBidders(allTrue);
+
+  broadcastState({
+    auctionTurnOffset: hostIndex,
+    activePlayerIndex: 0,
+    currentBid: 0,
+    highestBidder: null,
+    activeBidders: allTrue,
+  });
+};
+
 
   const handlePass = () => {
     console.log("🚫 Player passed:", players[activePlayerIndex]?.name);
@@ -231,7 +295,10 @@ const AuctionPhase = ({
           {
             console.log("if (isGold) Debug step 3, printing currentBid", currentBid)
             winner.gold += currentCard.value;
+
+            console.log("NOT PUSHING IN isGold")
             winner.hand.push(currentCard);
+            
             setAwaitingCardPayment(true);
             setGoldWinner({ player: winner, index: winnerIdx, bid: winningBid });
             setGoldCard(currentCard);
@@ -328,7 +395,7 @@ const AuctionPhase = ({
       updatedPlayers[goldPaymentWinner.index].gold -= totalSelected;
 
       // Add the won card to hand
-      console.log("Pushing the card")
+      console.log("Pushing the card in confirmGoldPayment")
       updatedPlayers[goldPaymentWinner.index].hand.push(goldPaymentWinner.card);
       const updatedDiscardPile = [...discardPile];
       updatedDiscardPile.splice(currentCardIndex, 1); // or use .shift() if always index 0
@@ -533,6 +600,10 @@ const AuctionPhase = ({
   // 🔶 Main auction UI
   return (
     <div>
+
+      {playerName === players[0]?.name && (
+        <button onClick={hostResetAuction}>🔁 Reset Auction Round</button>
+      )}
       <h3>Auction Phase</h3>
       <Card {...currentCard} />
       <p>

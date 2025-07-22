@@ -40,7 +40,7 @@ const ResultsScreen = ({ players, onRestart }) => {
         {finalWinners.map((p) => p.name).join(", ")}
       </h3>
 
-      <button onClick={onRestart}>🔄 Start New Game</button>
+      <button onClick={onRestart}>🔄 Return to Lobby</button>
     </div>
   );
 };
