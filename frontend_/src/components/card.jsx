@@ -26,18 +26,39 @@ const Card = (props) => {
   const isFlipped = startflipped || flipped;
 
    return (
-    <div
-      className="container"
-      onClick={() => {
-        if (!startflipped) setFlipped(!flipped);
-      }}
-    >
-      <div className={`card ${isFlipped ? "flipped" : ""}`}>
+  <div className="container" onClick={() => {
+    if (!startflipped) setFlipped(!flipped);
+  }}>
+    <div className="card-wrapper">
+      <div className="card-hover-info">
+        {type} — Value: {value}
+      </div>
+
+      <div className={`card ${isFlipped ? "flipped" : ""} ${type?.toLowerCase()}`}>
         <div className="front">
           <div style={{ backgroundColor, padding: "10px", borderRadius: "8px" }}>
-            <h4>{type}</h4>
-            <p>Value: {value}</p>
-            {!isSpecial && <p>Tiebreaker: {tieBreaker}</p>}
+            {type === "Religion" ? (
+              <img
+                src={`/religion_cards/religion_${value}.png`}
+                alt={`Religion ${value}`}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "8px"
+                }}
+                onError={(e) => {
+                  console.warn("Missing religion image:", e.target.src);
+                  e.target.style.display = "none";
+                }}
+              />
+            ) : (
+              <>
+                <h4>{type}</h4>
+                <p>Value: {value}</p>
+                {!isSpecial && <p>Tiebreaker: {tieBreaker}</p>}
+              </>
+            )}
           </div>
         </div>
         <div className="back">
@@ -45,7 +66,9 @@ const Card = (props) => {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default Card;

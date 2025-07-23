@@ -23,6 +23,13 @@
   border: 2px solid #b8a77f; /* golden-tan edge */
 }
 
+.card.religion,
+.religion.card {
+  background-color: #0fd56b;
+  border: 2px solid #c90741;
+}
+
+
 .front, 
 .back {
   height: 100%;
@@ -77,4 +84,29 @@
   background-size: cover;
 }
 
+
+.card-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-hover-info {
+  position: absolute;
+  top: -28px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.card-wrapper:hover .card-hover-info {
+  opacity: 1;
+}
 
