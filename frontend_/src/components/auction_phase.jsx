@@ -85,7 +85,11 @@ const AuctionPhase = ({
   const currentCard = discardPile[currentCardIndex];
   const isGold = currentCard?.type === "Gold";
   const player = biddingOrder[activePlayerIndex];
+  const isDiscardingPlayer =
+  awaitingCardPayment && goldWinner?.player?.name === playerName;
+
   const [bidInput, setBidInput] = useState("");
+  const isCurrentPlayer = player.name === playerName;
 
 
 
@@ -462,7 +466,13 @@ const AuctionPhase = ({
                 
               }}
             >
-              <Card {...card} />
+             <Card
+  card={card}
+  force_back={!isDiscardingPlayer}
+  locked_back_flip={true}
+/>
+
+
             </div>
           ))}
         </div>
@@ -483,6 +493,7 @@ const AuctionPhase = ({
     console.log("I am in awaitingCardPayment")
     console.log("This is current bid", currentBid)
     const toggleCardSelection = (card, idx) => {
+      if (!isDiscardingPlayer) return;
       setSelectedPaymentCards((prev) => {
         const alreadySelected = prev.find((c) => c.idx === idx);
         return alreadySelected
@@ -583,16 +594,31 @@ const AuctionPhase = ({
                   ? "2px solid red"
                   : "1px solid gray",
                 margin: "5px",
-                cursor: "pointer",
+                cursor: isDiscardingPlayer ? "pointer" : "not-allowed",
                 opacity: idx === goldWinner.player.hand.length - 1 ? 0.5 : 1, // dim the new card
-                pointerEvents: idx === goldWinner.player.hand.length - 1 ? "none" : "auto", // block clicks
+                pointerEvents: isDiscardingPlayer ? "auto" : "none",
               }}
             >
-              <Card {...card} />
+              <Card
+  card={card}
+  force_back={!isDiscardingPlayer}
+  locked_back_flip={true}
+/>
+
             </div>
           ))}
         </div>
-        <button onClick={confirmCardPayment}>Confirm Discard</button>
+        <button
+  onClick={confirmCardPayment}
+  disabled={!isDiscardingPlayer}
+  style={{
+    marginTop: "15px",
+    opacity: isDiscardingPlayer ? 1 : 0.5,
+    pointerEvents: isDiscardingPlayer ? "auto" : "none",
+  }}
+>
+  Confirm Discard
+</button>
       </div>
     );
   }
@@ -605,7 +631,7 @@ const AuctionPhase = ({
         <button onClick={hostResetAuction}>🔁 Reset Auction Round</button>
       )}
       <h3>Auction Phase</h3>
-      <Card {...currentCard} />
+      <Card {...currentCard} locked_back_flip={!isCurrentPlayer} />
       <p>
         Current Bid: {currentBid} by{" "}
         {highestBidder != null ? biddingOrder[highestBidder].name : "None"}
