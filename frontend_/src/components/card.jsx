@@ -37,10 +37,10 @@ const Card = (props) => {
       <div className={`card ${isFlipped ? "flipped" : ""} ${type?.toLowerCase()}`}>
         <div className="front">
           <div style={{ backgroundColor, padding: "10px", borderRadius: "8px" }}>
-            {type === "Religion" ? (
+            {type === "Religion" || type === "Science" ? (
               <img
-                src={`/religion_cards/religion_${value}.png`}
-                alt={`Religion ${value}`}
+                src={`/${type.toLowerCase()}_cards/${type.toLowerCase()}_${value}.png`}
+                alt={`${type} ${value}`}
                 style={{
                   width: "100%",
                   height: "100%",
