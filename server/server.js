@@ -36,14 +36,24 @@ io.on("connection", (socket) => {
   io.to(room).emit("start_game", { players });
 });
 
+  socket.on("cursor_position", ({ room, playerName, x, y }) => 
+    {
+      console.log(`🧭 cursor_position received from ${playerName} at (${x}, ${y})`);
+      socket.to(room).emit("cursor_position", { playerName, x, y });
+    });
+
+
 
 
 
   socket.on("sync_game_state", ({ room, gameState }) => {
     console.log("💥 Received sync_game_state with activeBidders:", gameState.activeBidders);
-  console.log(`🔁 Sync game state to room ${room} from sevrer.js has run`);
+    console.log("here is a test", gameState)
+    console.log(`🔁 Sync game state to room ${room} from sevrer.js has run`);
   io.to(room).emit("sync_game_state", gameState);
 });
+
+
 
 
 
