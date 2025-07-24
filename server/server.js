@@ -15,6 +15,7 @@ io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
   socket.on("join_game", ({ room, playerName }) => {
+    console.log(playerName, "has entered the room")
     socket.join(room);
 
     if (!playersInRoom[room]) {
@@ -25,10 +26,20 @@ io.on("connection", (socket) => {
     if (!alreadyJoined) {
       playersInRoom[room].push({ id: socket.id, name: playerName });
       console.log(`${playerName} joined room ${room}`);
-    }
+    } 
 
     io.to(room).emit("player_list", playersInRoom[room]);
   });
+
+  socket.on("update_name", ({ room, newName }) => {
+  if (!playersInRoom[room]) return;
+  const player = playersInRoom[room].find(p => p.id === socket.id);
+  if (player) {
+    player.name = newName;
+    console.log(`✏️ ${socket.id} changed name to "${newName}"`);
+    io.to(room).emit("player_list", playersInRoom[room]);
+  }
+});
 
   socket.on("start_game", ({ room }) => {
   console.log(`Starting game in room: ${room}`);
