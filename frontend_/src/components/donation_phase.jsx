@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Card from "./card";
 import "./card.css";
+import socket from "../socket";
 
 const DonationPhase = ({
   player,
@@ -17,10 +18,15 @@ const DonationPhase = ({
   onFinish,
   totalPlayers,
   currentPlayerIndex,
+  specialCardToPlay,
+  setSpecialCardToPlay,
   phase,
+  cursor,
 }) => {
 
-  console.log("🧠 DonationPhase mounted for", player?.name);
+  // console.log("🧠 DonationPhase mounted for", player?.name);
+
+  // console.log("🧠 donation sees cursor", cursor);
 
   
   const numToDraw = 2 + (totalPlayers - 1);
@@ -31,7 +37,6 @@ const DonationPhase = ({
   const [donationDeck, setDonationDeck] = useState(deck);
   const hasDrawn = useRef(false);
   const handledSpecialCards = useRef(new Set());
-  const [specialCardToPlay, setSpecialCardToPlay] = useState(null);
   const [drawnCount, setDrawnCount] = useState(0); // counts non-specials
   const isFirstRender = useRef(true);
 
@@ -79,6 +84,37 @@ useEffect(() =>
   console.log("🔄 Resetting draw flag for", player.name);
 }, [phase, player.name]);
 
+//Sending Cursor Movement
+useEffect(() => {
+  console.log("In the first useeffect")
+  if (!isCurrentPlayer || !specialCardToPlay) return;
+    console.log("Inside  if (!isCurrentPlayer || !specialCardToPlay) return;")
+
+  const handleMouseMove = (e) => {
+    console.log("🖱️ sending cursor at", e.clientX, e.clientY);
+    socket.emit("cursor_position", {
+      room: localStorage.getItem("roomCode"),
+      playerName: player.name,
+      x: e.clientX,
+      y: e.clientY
+    });
+  };
+
+  
+  window.addEventListener("mousemove", handleMouseMove);
+  return () => window.removeEventListener("mousemove", handleMouseMove);
+}, [isCurrentPlayer, specialCardToPlay]);
+
+useEffect(() => {
+  console.log("🧠 isCurrentPlayer:", isCurrentPlayer);
+  console.log("🧠 specialCardToPlay:", specialCardToPlay);
+}, [isCurrentPlayer, specialCardToPlay]);
+
+useEffect(() => {
+  if (specialCardToPlay) {
+    console.log("👁️ SPECIALCARD SEEN:", specialCardToPlay);
+  }
+}, [specialCardToPlay]);
 
   //For DrawingCards
 useEffect(() => 
@@ -108,9 +144,10 @@ useEffect(() =>
   {
     const card = updatedDeck.pop();
 
+    //If you draw a special card
     if (card.isSpecial) 
     {
-      handledSpecialCards.current.add(card); // ✅ Queue for later
+      handledSpecialCards.current.add(card); 
       continue; 
     }
 
@@ -125,10 +162,12 @@ useEffect(() =>
   setDeck(updatedDeck);
   setDonationDeck(updatedDeck);
   setCardsToProcess(drawn.reverse());
+  console.log("BSTATE CHANGING THE DECK INSIDE IF(card.isSpecial)")
   broadcastState({ deck: updatedDeck });
 
   if (drawn.length < numToDraw) {
     console.warn("Not enough non-special cards — skipping to auction");
+    console.log("BSTATE CHANGING THE PHASE INSIDE IF(card.isSpecial)")
     broadcastState({ phase: "auction" });
     return;
   }
@@ -136,8 +175,23 @@ useEffect(() =>
   const specialsArray = [...handledSpecialCards.current];
   if (specialsArray.length > 0) {
     const [first, ...rest] = specialsArray;
-    setSpecialCardToPlay(first);
+
+    console.log("📦 Broadcasting specialCardToPlay:", first);
+
+    // setSpecialCardToPlay(first);
     handledSpecialCards.current = new Set(rest);
+    
+    const broadcastPayload = {
+      action: "SpecialCard",
+      specialCardToPlay: {
+        ...first,
+        playerName: player.name,
+        
+      }
+    };
+
+console.log("📡 DDDD Broadcasting special card state:", broadcastPayload);
+broadcastState(broadcastPayload);
   }
 }, [phase, isCurrentPlayer]);
 
@@ -156,6 +210,7 @@ useEffect(() =>
       if (kept) return alert("You've already kept a card.");
       setKept(card);
 
+      console.log("BSTATE CHANGING THE ACTION WHEN THEY KEEP A CARD")
       broadcastState
       ({
         donationAction: 
@@ -169,7 +224,7 @@ useEffect(() =>
     {
       if (discarded) return alert("You've already discarded a card.");
       setDiscarded(card);
-
+      console.log("BSTATE CHANGING THE DISDCARD ACTION")
       broadcastState
       ({
         donationAction: 
@@ -194,6 +249,7 @@ useEffect(() =>
       setShared(newShared);
       setSharedPool(updatedSharedPool); // ✅ Update local sharedPool state
 
+      console.log("BSTATE CHANGING THE SHAREDPOOL")
       broadcastState({
         sharedPool: updatedSharedPool, // ✅ Broadcast full updated shared pool
         donationAction: {
@@ -236,7 +292,7 @@ useEffect(() =>
     updatedPlayers,
   });
   
-  console.log("🧮 Broadcasting updated deck length:", donationDeck.length);
+  console.log("BSTATE CHANGING INSIDE CONFIRMTURN", donationDeck.length);
   broadcastState({
     discardPile: updatedDiscard,
     sharedPool: updatedShared,
@@ -303,6 +359,8 @@ useEffect(() =>
             ⏳ Waiting for {player.name} to select dice...
           </p>
         )}
+
+       
         <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
           {diceToModify.map((die, i) => (
             <div key={i} style={{ border: "1px solid #ccc", padding: "10px", borderRadius: "8px", textAlign: "center", minWidth: "80px" }}>
@@ -326,8 +384,9 @@ useEffect(() =>
                   const needed = diceSelectionCard.value === 2 ? 2 : 1;
                   if (nextChosen.size === needed) {
 
+                    console.log("I AM RIPPING A BSTATE UPDATING ONLY THE DICE")
+
                     broadcastState({ dice: updated });
-                    // setSpecialCardToPlay(null);
                     setDiceToModify(null);
                     setDiceSelectionCard(null);
                     setDiceChosen(new Set());
@@ -343,6 +402,7 @@ useEffect(() =>
                       setSpecialCardToPlay(next);
                       handledSpecialCards.current = new Set(rest);
                     } else {
+                      console.log("I am setting setSpecialCardToPlay to Null")
                       setSpecialCardToPlay(null);
                     }
                   }
@@ -357,14 +417,72 @@ useEffect(() =>
     )}
 
     {/* 👤 Non-current player's view */}
-    {!isCurrentPlayer && (
-      <>
-      <p>⏳ Waiting for {players[currentPlayerIndex]?.name} to complete their turn ...</p>
-      {/* Working here}*/}
+{specialCardToPlay && specialCardToPlay.playerName !== player.name ? (
+  
+  <div style={{
+    margin: "10px 0",
+    padding: "10px",
+    border: "2px dashed orange",
+    backgroundColor: "#fff8e1",
+    borderRadius: "8px"
+  }}>
+    {console.log("GGGGG")}
+    <h3>🔭 Spectating: {specialCardToPlay.playerName} is resolving a Special Dice Card</h3>
+    <Card {...specialCardToPlay} />
+    <p style={{ color: "gray" }}>Please watch their screen to see the dice modifications.</p>
 
-      <Card card={currentCard} startflipped={true} />
-      </> 
-    )}
+    {cursor && specialCardToPlay && specialCardToPlay.playerName !== player.name && (
+      <>
+      {console.log("👁️ Rendering remote cursor at:", cursor.x, cursor.y)}
+       <div
+    style={{
+      position: "absolute",
+      left: `${cursor.x}px`,
+      top: `${cursor.y}px`,
+      pointerEvents: "none",
+      transform: "translate(-50%, -50%)",
+      zIndex: 9999,
+    }}
+  >
+    <div
+      style={{
+        width: "16px",
+        height: "16px",
+        backgroundColor: "black",
+        borderRadius: "50%",
+        opacity: 0.75,
+        border: "2px solid white",
+      }}
+    />
+    <div
+      style={{
+        backgroundColor: "#000",
+        color: "#fff",
+        fontSize: "12px",
+        marginTop: "4px",
+        padding: "2px 6px",
+        borderRadius: "4px",
+      }}
+    >
+      {cursor.playerName}
+    </div>
+  </div>
+      </>
+      
+ 
+)}
+
+  </div>
+) : !isCurrentPlayer && (
+  <>
+    <p>⏳ Waiting for {players[currentPlayerIndex]?.name} to complete their turn ...</p>
+    <Card card={currentCard} startflipped={true} />
+  </>
+)}
+
+
+
+     
 
     {/* ✅ Main player control section */}
     {isCurrentPlayer && (

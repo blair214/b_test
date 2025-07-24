@@ -45,6 +45,12 @@ const GameRunner = ({ playerName }) => {
   const [finalResults, setFinalResults] = useState([]);
   const { room } = useParams();
 
+  //For special dice cards
+  const [specialCardToPlay, setSpecialCardToPlay] = useState(null);
+
+  //For cursor
+  const [remoteCursor, setRemoteCursor] = useState(null);
+
   const navigate = useNavigate();
 
   const handleRestart = () => {
@@ -89,6 +95,8 @@ const GameRunner = ({ playerName }) => {
     goldWinner,
     goldCard,
     auctionTurnOffset,
+
+    specialCardToPlay,
   });
 
   const broadcastState = (newPartialState = null) => {
@@ -98,8 +106,12 @@ const GameRunner = ({ playerName }) => {
   };
   console.log("📤 Broadcasting FULL game state:", fullState, playerName);
   socket.emit("sync_game_state", { room: `${room}`, gameState: fullState });
+  console.log("After broadcasting full gamestate")
 };
 
+//Next section is taking information from broadcasts
+
+//For Auction
 useEffect(() => {
   if (phase === "auction") {
     console.log("🧾 Entering Auction Phase — FULL game state:");
@@ -107,27 +119,56 @@ useEffect(() => {
   }
 }, [phase]);
 
+//When someone discards
 useEffect(() => {
   const handler = (gameState) => {
     if (gameState?.donationAction?.action === "discarded") {
       console.log(`ASDFDSF🗑️ ${gameState.donationAction.player} discarded a card`);
     }
   };
-
   socket.on("sync_game_state", handler);
   return () => socket.off("sync_game_state", handler);
 }, []);
 
+//When someone keeps their card
 useEffect(() => {
   const handler = (gameState) => {
     if (gameState?.donationAction?.action === "kept") {
       console.log(`sfsfsfs ${gameState.donationAction.player} kept a card`);
     }
   };
-
   socket.on("sync_game_state", handler);
   return () => socket.off("sync_game_state", handler);
 }, []);
+
+//When someone draws a special card
+useEffect(() => {
+  const handleSync = (gameState) => {
+    console.log("📡 Full sync received:", gameState);
+
+    if ("specialCardToPlay" in gameState) {
+      console.log("🎴 Setting specialCardToPlay:", gameState.specialCardToPlay);
+      setSpecialCardToPlay(gameState.specialCardToPlay); // Can be null or an object
+    }
+  };
+
+  socket.on("sync_game_state", handleSync);
+  return () => socket.off("sync_game_state", handleSync);
+}, []);
+
+
+
+//Cursor
+useEffect(() => {
+  const handleCursor = ({ playerName, x, y }) => {
+    setRemoteCursor({ playerName, x, y });
+  };
+
+  socket.on("cursor_position", handleCursor);
+  return () => socket.off("cursor_position", handleCursor);
+}, []);
+
+
 
 useEffect(() => {
   console.log("🎯 auctionTurnOffset updated to:", auctionTurnOffset);
@@ -136,9 +177,6 @@ useEffect(() => {
 useEffect(() => {
   console.log("📡 GameManager useEffect ran");
 
-
-  
-  // Always attach this listener — it must run regardless of playerName
   const handleGameState = (gameState) => {
    if (!hasSynced.current) {
   hasSynced.current = true;
@@ -146,20 +184,13 @@ useEffect(() => {
 } else {
   console.log("🔁 Re-syncing from broadcast");
 }
-    // console.log("This is the gamestate", gameState)
-    // console.log("💥 From player:", playerName);
+
     localStorage.setItem("last_game_state", JSON.stringify(gameState)); 
 
     setPhase(gameState.phase);
     setDeck(gameState.deck);
-    // console.log("🃏 Deck received in GameRunner:", gameState.deck);
-    // console.log("📦 Deck length:", gameState.deck.length, playerName);
     setDiscardPile(gameState.discardPile);
-
-    setSharedPool([...gameState.sharedPool]);  // ✅ ensure clone to trigger re-render
-    
-
-
+    setSharedPool([...gameState.sharedPool]);  
     setPlayers(gameState.players);
     setCurrentPlayerIndex(gameState.currentPlayerIndex);
     setLastDonatorIndex(gameState.lastDonatorIndex);
@@ -181,20 +212,17 @@ useEffect(() => {
     setGoldCard(gameState.goldCard ?? null);
     setAuctionTurnOffset(gameState.auctionTurnOffset ?? 0);
 
-    if (gameState.donationAction) {
-  const { player, action, card } = gameState.donationAction;
-  console.log(`🔊 ${player} just ${action} a card: ${card.type} ${card.value}`);
-}
+    if (gameState.donationAction) 
+  {
+    const { player, action, card } = gameState.donationAction;
+    console.log(`🔊 ${player} just ${action} a card: ${card.type} ${card.value}`);
+  }
 
   };
 
   // ✅ Use fallback *once* before listener
   if (!hasSynced.current) {
     const cached = localStorage.getItem("last_game_state");
-    // if (cached) {
-    //   console.log("📦 Using cached game state");
-    //   handleGameState(JSON.parse(cached));
-    // }
   }
 
 
@@ -203,8 +231,7 @@ useEffect(() => {
   
   if (playerName) {
     socket.emit("join_game", { room: `${room}`, playerName });
-    console.log("what is going on")
-
+    
     const cachedStart = localStorage.getItem("start_game_payload");
     if (cachedStart) {
       console.log("📦 Using cached start_game payload");
@@ -226,7 +253,6 @@ useEffect(() => {
 
         const rolledDice = rollDice();
         setDice(rolledDice); 
-        console.log("Dice rolled", rolledDice)
         const state = {
           phase: "donation",
           deck: newDeck,
@@ -256,7 +282,6 @@ useEffect(() => {
     }
 
     socket.on("player_list", (list) => {
-      // console.log("📡 player_list received:", list);
       setPlayersOnline(list);
     });
   }
@@ -338,17 +363,13 @@ useEffect(() => {
           setPlayers={setPlayers}
           broadcastState={broadcastState}
           currentPlayerIndex={currentPlayerIndex}
+          
+          specialCardToPlay={specialCardToPlay}
+          setSpecialCardToPlay={setSpecialCardToPlay}
           totalPlayers={players.length}
+          cursor={remoteCursor}
           onFinish={({ updatedDiscard, updatedShared, updatedPlayers }) => {
-            // console.log("Everything from DonationPhase");
-            // console.log("🗑️ Discard Pile:", updatedDiscard);
-            // console.log("🫱 Shared Pool:", updatedShared);
-            // console.log("🧑‍🤝‍🧑 Players:", updatedPlayers);
-            // console.log("🃏 Player Hands:", updatedPlayers.map(p => ({
-            //   name: p.name,
-            //   hand: p.hand,
-            //   gold: p.gold
-            // })));  
+        
         }}
 
 
@@ -377,9 +398,9 @@ useEffect(() => {
     onFinish={() => {
   
       const nextPlayerIndex = (lastDonatorIndex + 1) % players.length;
-      console.log(`   - nextPlayerIndex: ${nextPlayerIndex}`);
+      // console.log(`   - nextPlayerIndex: ${nextPlayerIndex}`);
       if (deck.length < players.length + 1) {
-        console.log("🎯 Switching to auction phase — NO broadcast here");
+        // console.log("🎯 Switching to auction phase — NO broadcast here");
     setAuctionStarterIndex(nextPlayerIndex);
     setPhase("auction");
 
