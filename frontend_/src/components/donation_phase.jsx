@@ -178,7 +178,7 @@ useEffect(() =>
 
     console.log("📦 Broadcasting specialCardToPlay:", first);
 
-    // setSpecialCardToPlay(first);
+    setSpecialCardToPlay(first);
     handledSpecialCards.current = new Set(rest);
     
     const broadcastPayload = {

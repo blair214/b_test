@@ -1,0 +1,85 @@
+.naming-button {
+  position: fixed;
+  top: 16px;
+  right: 130px;
+  z-index: 1000;
+
+  display: inline-block;
+  outline: 0;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+  color: #fff;
+  font-size: 14px;
+  height: 38px;
+  padding: 8px 24px;
+  border-radius: 50px;
+  background-image: linear-gradient(180deg,#7c8aff,#3c4fe0);
+  box-shadow: 0 4px 11px 0 rgb(37 44 97 / 15%), 0 1px 3px 0 rgb(93 100 148 / 20%);
+  transition: all .2s ease-out;
+}
+
+.naming-button:hover {
+  box-shadow: 0 8px 22px 0 rgb(37 44 97 / 15%), 0 4px 6px 0 rgb(93 100 148 / 20%);
+}
+
+.dropdown-box {
+  position: absolute;
+  top: 60px;
+  right: 100px;
+  width: 240px; /* increase width */
+  background-color: #f8f8f8;
+  padding: 20px 16px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  z-index: 1001;
+  font-family: 'Nunito', sans-serif;
+}
+
+
+.nickname {
+    font-size: 12px;
+}
+
+.nickname-input {
+  width: 90%;
+  padding: 10px 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  text-align: center;
+  border: 2px solid #ccc;
+  border-radius: 18px;
+  outline: none;
+  background-color: white;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.nickname-input:focus {
+  border-color: #3c4fe0;
+  box-shadow: 0 0 6px rgba(60, 79, 224, 0.4);
+}
+
+
+
+.normal-button {
+  margin-top: 12px;
+  display: block;
+  width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  color: #111;
+  background: #ffe600;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.normal-button:hover {
+  background: #f7d800;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}

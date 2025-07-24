@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import socket from "../socket";
+import "./lobby.css";
 
 const Lobby = ({ playerName, setPlayerName }) => {
   const [players, setPlayers] = useState([]);
   const navigate = useNavigate();
   const room = localStorage.getItem("roomCode") || "biblios";
+  const [showBox, setShowBox] = useState(false);
+  const [tempName, setTempName] = useState(playerName);
 
   useEffect(() => {
   socket.emit("join_game", { room, playerName });
@@ -48,6 +51,23 @@ const Lobby = ({ playerName, setPlayerName }) => {
     socket.emit("start_game", { room: room });
   };
 
+  const toggleDropDown = () => {
+    setShowBox((prev) => !prev);
+    console.log(showBox)
+  }
+
+  const updateName = () => {
+  if (tempName.trim()) {
+    setPlayerName(tempName.trim());
+    localStorage.setItem("playerName", tempName.trim());
+
+    // Optional: re-emit join_game with new name
+    socket.emit("update_name", { room, newName: tempName.trim() });
+
+    setShowBox(false); // Close dropdown after update
+    } 
+  };
+
   const isHost = players.length > 0 && players[0].name === playerName;
 
   return (
@@ -67,6 +87,33 @@ const Lobby = ({ playerName, setPlayerName }) => {
       ) : (
         <p>Waiting for host to start the game...</p>
       )}
+
+      <button className={'naming-button'} onClick={toggleDropDown}>
+        {playerName}
+      </button>
+
+      {showBox && (
+        <div className={'dropdown-box'}>
+          <p className="nickname">Nickname</p>
+          <input className="nickname-input"
+            type="text"
+            value={tempName}
+            onChange={(e) => setTempName(e.target.value)}
+            placeholder="Enter your nickname"
+          />
+          <br></br>
+
+          <button className={'normal-button'} onClick={updateName}>
+            Update your nickname
+          </button>
+  
+        </div>
+        
+      )}
+
+      <br></br>
+
+      
     </div>
   );
 };
