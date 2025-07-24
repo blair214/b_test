@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const generateRoomCode = () =>
   Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -29,6 +29,10 @@ const Home = ({ setPlayerName }) => {
     navigate("/lobby");
   };
 
+  const goToRules = () => {
+    navigate("/rules")
+  }
+
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
       <h2>Start or Join a Game</h2>
@@ -52,6 +56,9 @@ const Home = ({ setPlayerName }) => {
       <hr style={{ width: "200px", margin: "30px auto" }} />
 
       <button onClick={handleCreateRoom}>🎲 Create Random Room</button>
+
+      <button onClick={goToRules}> Go To Rules</button>
+
     </div>
   );
 };

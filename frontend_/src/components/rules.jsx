@@ -1,7 +1,16 @@
 // src/components/rules.jsx
 import React from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+
+
 
 const RulesPage = () => {
+
+  const navigate = useNavigate();
+
+  const goToHome = () => {
+  navigate("/")
+  }
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Game Rules</h1>
@@ -11,6 +20,8 @@ const RulesPage = () => {
         <li>During the Auction phase, players bid gold or cards...</li>
         <li>Special cards affect dice values or game state...</li>
         <li>Scoring is done by majority value per region...</li>
+
+        <button onClick={goToHome}> Back to Home</button>
         {/* Add more rules as needed */}
       </ol>
     </div>
