@@ -500,13 +500,13 @@ useEffect(() => {
 
       {phase === "scoring" && dice && (
         <ScoringPhase
-  players={players}
-  dice={dice}
-  isHost={players[0]?.name === playerName}
-  setFinalResults={(scoredPlayers) => {
-    setPlayers(scoredPlayers);
-    setFinalResults(scoredPlayers);
-    setFinalPhaseDone(true);
+          players={players}
+          dice={dice}
+          isHost={players[0]?.name === playerName}
+          setFinalResults={(scoredPlayers) => {
+            setPlayers(scoredPlayers);
+            setFinalResults(scoredPlayers);
+            setFinalPhaseDone(true);
     
     // ✅ broadcast to all players
     broadcastState({
