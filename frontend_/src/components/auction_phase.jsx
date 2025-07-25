@@ -450,7 +450,10 @@ const AuctionPhase = ({
 
     return (
       <div>
-        <h3>{goldPaymentWinner.player.name}, pay {goldPaymentWinner.bid} gold with your gold cards:</h3>
+
+        {goldPaymentWinner?.player?.name === playerName ?(
+          <>
+          <h3>{goldPaymentWinner.player.name}, pay {goldPaymentWinner.bid} gold with your gold cards:</h3>
         <p>Total selected: {totalSelected}</p>
         <div style={{ display: "flex", flexWrap: "wrap" }}>
           {players[goldPaymentWinner.index].hand.map((card, idx) => (
@@ -484,7 +487,14 @@ const AuctionPhase = ({
   }}
 >
   Confirm Payment
-</button>
+</button></>
+
+        ) : (
+          <p>
+            Pls wait xd
+          </p>
+        )}
+        
       </div>
     );
   }
