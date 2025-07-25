@@ -11,6 +11,7 @@ import socket from "../socket";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import "./lobby.css";
 import PlayerHand from "./player_hand";
 
 const GameRunner = ({ playerName }) => {
@@ -53,6 +54,8 @@ const GameRunner = ({ playerName }) => {
 
   const navigate = useNavigate();
 
+  //For UI
+  
   const handleRestart = () => {
   localStorage.removeItem("last_game_state");
   localStorage.removeItem("start_game_payload");
@@ -359,6 +362,13 @@ useEffect(() => {
     </ul>
   </div>
 )}
+
+
+
+    
+        
+
+
 
       {phase === "donation" &&(
         // playerName === players[currentPlayerIndex]?.name &&

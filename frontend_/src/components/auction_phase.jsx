@@ -584,13 +584,23 @@ const AuctionPhase = ({
 
     return (
       <div>
-        <h3>{goldWinner.player.name}, select {goldWinner.bid} cards to discard:</h3>
+
+        {isDiscardingPlayer ? (
+          <>
+          <h3>{goldWinner.player.name}, select {goldWinner.bid} cards to discard:</h3>
         <div style={{ display: "flex", flexWrap: "wrap" }}>
           {goldWinner.player.hand.map((card, idx) => (
             <div
               key={idx}
-              onClick={() => toggleCardSelection(card, idx)}
-              style={{
+              onClick={() => 
+                {
+                  if (idx !== goldWinner.player.hand.length - 1)
+                   {
+                      toggleCardSelection(card, idx);
+                   }
+              }}
+              style=
+              {{
                 border: selectedPaymentCards.some((c) => c.idx === idx)
                   ? "2px solid red"
                   : "1px solid gray",
@@ -600,26 +610,30 @@ const AuctionPhase = ({
                 pointerEvents: isDiscardingPlayer ? "auto" : "none",
               }}
             >
-              <Card
-  card={card}
-  force_back={!isDiscardingPlayer}
-  locked_back_flip={true}
-/>
+              
+              <Card card={card} force_back={!isDiscardingPlayer} locked_back_flip={true}/>
 
             </div>
           ))}
         </div>
+
         <button
-  onClick={confirmCardPayment}
-  disabled={!isDiscardingPlayer}
-  style={{
-    marginTop: "15px",
-    opacity: isDiscardingPlayer ? 1 : 0.5,
-    pointerEvents: isDiscardingPlayer ? "auto" : "none",
-  }}
->
-  Confirm Discard
-</button>
+            onClick={confirmCardPayment}
+            disabled={!isDiscardingPlayer}
+            style={{
+              marginTop: "15px",
+              opacity: isDiscardingPlayer ? 1 : 0.5,
+              pointerEvents: isDiscardingPlayer ? "auto" : "none",
+            }}
+          >
+            Confirm Discard
+          </button>
+
+          </>
+        ) : (
+          <p>Waiting for someone to discard</p>
+        )}
+        
       </div>
     );
   }
@@ -641,7 +655,12 @@ const AuctionPhase = ({
       👉 {player.name}'s turn to bid
     </p>
 
-    <p>Gold: {player.gold}, Cards: {player.hand.length}</p>
+    <p>
+  {player.name === playerName
+    ? `Gold: ${player.gold}, Cards: ${player.hand.length}`
+    : `Cards: ${player.hand.length}`}
+</p>
+
 
       {player.name === playerName && (
   <>
