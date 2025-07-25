@@ -115,7 +115,7 @@ const AuctionPhase = ({
 
       // Auction player tracking
       activePlayerIndex: 0,
-      auctionTurnOffset: startingIndex,
+      auctionTurnOffset: 0,
       activeBidders: players.map(() => true),
 
       // Gold/card payment resets
