@@ -376,7 +376,7 @@ useEffect(() => {
         ))}
       </ul>
 
-      {phase === "donation" && (
+      {(phase === "donation" || phase === "shared_selection") &&(
   <div style={{ position: "relative", display: "inline-block", textAlign: "center" }} className="deck-container">
     <div style={{ fontSize: "14px", marginBottom: "4px", fontWeight: "bold" }}>
       Remaining Deck
@@ -425,7 +425,42 @@ useEffect(() => {
         }
       `}
     </style>
-  </div>
+
+    <div style={{ position: "relative", display: "inline-block", marginLeft: "20px", textAlign: "center" }}>
+      <div style={{ fontSize: "14px", marginBottom: "4px" }}>Discard</div>
+      <img
+        src="/hearthstonecards.webp"
+        alt="Discard"
+        style={{
+          width: "70px",
+          height: "auto",
+          borderRadius: "6px",
+          boxShadow: "0 0 6px rgba(0,0,0,0.3)",
+          filter: "grayscale(100%) brightness(80%)", // visually distinguish it
+          transform: "rotate(-10deg)",
+          cursor: "default",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: "-30px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          backgroundColor: "#333",
+          color: "#fff",
+          padding: "4px 8px",
+          borderRadius: "4px",
+          fontSize: "12px",
+          whiteSpace: "nowrap",
+          pointerEvents: "none",
+          opacity: 1,
+        }}
+      >
+        {discardPile.length} cards
+      </div>
+    </div>
+  </div> 
 )}
 
 
